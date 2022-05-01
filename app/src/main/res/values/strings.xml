@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Speech  to text</string>
+    <string name="say_it">speak</string>
+    <string name="enter_text">Enter text here</string>
+    <string name="clear">Clear</string>
+</resources>
