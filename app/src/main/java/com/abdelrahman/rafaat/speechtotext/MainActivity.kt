@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -16,6 +15,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import java.util.*
@@ -28,11 +28,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var textToSpeechButton: Button
     private lateinit var clearButton: Button
     private lateinit var editText: EditText
-    private lateinit var textView: TextView
     private lateinit var textToSpeech: TextToSpeech
-    private lateinit var speechToText: ImageView
+    private lateinit var speechToTextImageView: ImageView
+    private lateinit var copyTextImageView: ImageView
+    private lateinit var shareTextImageView: ImageView
+
     private lateinit var languagesSpinner: Spinner
     private lateinit var currentLocale: Locale
+
     private val languages = arrayOf(
         Locale.UK,
         Locale.FRANCE,
@@ -45,6 +48,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         Locale.forLanguageTag("ar")
     )
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,16 +56,19 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         textToSpeechButton = findViewById(R.id.text_to_speech)
         editText = findViewById(R.id.editText)
-        textView = findViewById(R.id.text_view)
-        speechToText = findViewById(R.id.speech_to_text)
+        speechToTextImageView = findViewById(R.id.speech_to_text)
+        copyTextImageView = findViewById(R.id.copy_text)
+        shareTextImageView = findViewById(R.id.share_text)
         languagesSpinner = findViewById(R.id.languages_spinner)
         clearButton = findViewById(R.id.clear_button)
 
+
+
         clearButton.setOnClickListener {
-            textView.text = ""
+            editText.setText("")
         }
 
-        languagesSpinner.setOnItemSelectedListener(this)
+        languagesSpinner.onItemSelectedListener = this
         val adapter = ArrayAdapter(
             this,
             androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
@@ -82,70 +89,49 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             }
         }
 
-        speechToText.setOnClickListener {
+        speechToTextImageView.setOnClickListener {
             Log.i(TAG, "onCreate: speechToText---> $currentLocale")
 
             if (isNetworkAvailable(this)) {
-                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                intent.putExtra(
+                val intentText = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                intentText.putExtra(
                     RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
                 )
-                intent.putExtra(
+                intentText.putExtra(
                     RecognizerIntent.EXTRA_LANGUAGE,
                     currentLocale
                 )
 
-                startActivityForResult(intent, SPEECH_TO_TEXT_REQUEST_CODE)
+                startActivityForResult(intentText, SPEECH_TO_TEXT_REQUEST_CODE)
             } else {
-                val snackbar = Snackbar.make(
+                val snackBar = Snackbar.make(
                     findViewById(R.id.root_layout),
-                    "No internet connection",
+                    getString(R.string.no_internet),
                     Snackbar.LENGTH_SHORT
                 )
-                snackbar.setAction("Enable Connection") {
+                snackBar.setAction(getString(R.string.enable_connection)) {
                     val panelIntent = Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
                     startActivityForResult(panelIntent, 0)
                 }
-                snackbar.show()
+                snackBar.show()
 
             }
 
         }
-        textView.setOnClickListener {
-            Snackbar.make(
-                findViewById(R.id.root_layout),
-                "To copy text click long click ",
-                Snackbar.LENGTH_SHORT
-            ).show()
+
+        copyTextImageView.setOnClickListener {
+            copyText()
         }
-        textView.setOnLongClickListener(
-            View.OnLongClickListener(
-                fun(_: View?): Boolean {
-                    Log.i(TAG, ": setOnLongClickListener")
-                    if (textView.text.toString().isNotEmpty()) {
-                        val manger: ClipboardManager =
-                            getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clipData = ClipData.newPlainText("text ", textView.text.toString())
-                        manger.setPrimaryClip(clipData)
 
-                        Snackbar.make(
-                            findViewById(R.id.root_layout),
-                            "text copy success",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Snackbar.make(
-                            findViewById(R.id.root_layout),
-                            "no text to copy it",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
+        shareTextImageView.setOnClickListener {
+            val intent = Intent()
+            intent.action = Intent.ACTION_SEND
+            intent.putExtra(Intent.EXTRA_TEXT, editText.text.toString())
+            intent.type = "text/plain"
+            startActivity(Intent.createChooser(intent, "Share To:"))
+        }
 
-                    return true
-                }
-            )
-        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -156,7 +142,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 if (resultCode == Activity.RESULT_OK && data != null) {
                     val textResult: ArrayList<String> =
                         data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)!!
-                    textView.append(textResult[0])
+                    editText.append(textResult[0])
 
                 }
             }
@@ -198,6 +184,26 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             }
         }
         return isConnected
+    }
+
+    private fun copyText() {
+        if (editText.text.toString().isNotEmpty()) {
+            val manger: ClipboardManager =
+                getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipData = ClipData.newPlainText("text ", editText.text.toString())
+            manger.setPrimaryClip(clipData)
+            Snackbar.make(
+                findViewById(R.id.root_layout),
+                getString(R.string.text_copied),
+                Snackbar.LENGTH_SHORT
+            ).show()
+        } else {
+            Snackbar.make(
+                findViewById(R.id.root_layout),
+                "no text to copy it",
+                Snackbar.LENGTH_SHORT
+            ).show()
+        }
     }
 
 

@@ -3,7 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/layout/activity_main.xml" value="0.22826086956521738" />
+        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/drawable/button_primary.xml" value="0.137" />
+        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/drawable/custom_bordered_ripple.xml" value="0.137" />
+        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/drawable/ic_copy.xml" value="0.171" />
+        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/drawable/ic_mic.xml" value="0.171" />
+        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/drawable/ic_share.xml" value="0.171" />
+        <entry key="..\:/Android/projects/MyProjects/Speechtotext/app/src/main/res/layout/activity_main.xml" value="0.1" />
       </map>
     </option>
   </component>

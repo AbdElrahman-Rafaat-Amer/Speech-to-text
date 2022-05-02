@@ -3,4 +3,7 @@
     <string name="say_it">speak</string>
     <string name="enter_text">Enter text here</string>
     <string name="clear">Clear</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="text_copied">text copy success</string>
+    <string name="enable_connection">Enable Connection</string>
 </resources>

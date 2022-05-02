@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">النص إلي كلام</string>
+    <string name="say_it">تكلم</string>
+    <string name="enter_text">ادخل النص هنا</string>
+    <string name="clear">امسح</string>
+    <string name="no_internet">لا يوجد اتصال بالانترنت</string>
+    <string name="text_copied">تم نسخ النص</string>
+    <string name="enable_connection">الاتصال بالنت</string>
+</resources>
